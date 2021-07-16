@@ -41,10 +41,24 @@ struct NewsListView: View {
                     })
                         .buttonStyle(PlainButtonStyle())
                 }
-                if let image = article.image {
-                    Image(uiImage: image)
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
+                if #available(iOS 15, *) {
+                    #warning("This is a temporary fix")
+                    if article.image != nil {
+                        AsyncImageList(url: article.imageURL) { image in
+                            image
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                        } placeholder: {
+                            ProgressView()
+                        }
+
+                    }
+                } else {
+                    if let image = article.image {
+                        Image(uiImage: image)
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                    }
                 }
             }
         }

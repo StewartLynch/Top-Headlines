@@ -33,6 +33,9 @@ struct ArticleViewModel: Identifiable {
     var description: String {
         article.description?.withoutHtmlTags ?? ""
     }
+    var imageURL: URL? {
+        article.urlToImage
+    }
     var image: UIImage? {
         guard let imageURL = article.urlToImage else { return nil }
         guard let data = try? Data(contentsOf: imageURL) else { return nil }
