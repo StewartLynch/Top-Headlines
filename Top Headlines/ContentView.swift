@@ -12,46 +12,16 @@ struct ContentView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                List(viewModel.articles) { article in
-                    VStack(alignment: .leading) {
-                        Group {
-                            Text(article.source).fontWeight(.bold)
-                            Text(article.author)
-                            Text(article.date)
+                if #available(iOS 15, *) {
+                    NewsListView(articles: viewModel.articles)
+                        .task {
+                            viewModel.getNews()
                         }
-                        .font(.caption)
-                        Text(article.title).fontWeight(.bold)
-                        Text(article.description)
-                            .foregroundColor(Color.secondary)
-                        HStack {
-                            Spacer()
-                            Link(destination: article.url, label: {
-                                Image(systemName: "globe")
-                                    .font(.system(size: 36))
-                                    .foregroundColor(.gray)
-                                    .overlay(
-                                        Image(systemName: "link")
-                                            .font(.system(size: 12, weight: .bold))
-                                            .foregroundColor(.gray)
-                                            .padding(1)
-                                            .background(Circle()
-                                                            .fill(Color(.secondarySystemBackground))
-                                                            .shadow(color: .black.opacity(0.4), radius: 2, x: 0, y: 2)
-                                            )
-                                            .shadow(color: .black.opacity(0.4), radius: 2, x: 0, y: 2)
-                                    )
-                            })
-                            .buttonStyle(PlainButtonStyle())
+                } else {
+                NewsListView(articles: viewModel.articles)
+                        .onAppear {
+                            viewModel.getNews()
                         }
-                        if let image = article.image {
-                            Image(uiImage: image)
-                                .resizable()
-                                .aspectRatio(contentMode: .fit)
-                        }
-                    }
-                }
-                .onAppear {
-                    viewModel.getNews()
                 }
                 if viewModel.isLoading {
                     ProgressView("Fetching the news")
