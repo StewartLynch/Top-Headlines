@@ -45,4 +45,28 @@ class APIService {
             }
         }.resume()
     }
+    
+    @available(iOS 15, *)
+    @MainActor
+    func getJSON<T: Decodable>(urlString: String,
+                               dateDecodingStrategy: JSONDecoder.DateDecodingStrategy = .deferredToDate,
+                               keyDecodingStrategy: JSONDecoder.KeyDecodingStrategy = .useDefaultKeys) async throws -> T {
+        guard let url = URL(string: urlString) else {
+            throw APIError.error(NSLocalizedString("Error: Invalid URL", comment: ""))
+            
+        }
+        let request = URLRequest(url: url)
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let _ = response as? HTTPURLResponse else {
+            throw APIError.error(NSLocalizedString("Error: Date Request error", comment: ""))
+        }
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = dateDecodingStrategy
+        decoder.keyDecodingStrategy = keyDecodingStrategy
+        
+        guard let decodedData =  try? decoder.decode(T.self, from: data) else {
+            throw APIError.error(NSLocalizedString("Error: Decoding error", comment: ""))
+        }
+        return decodedData
+    }
 }
