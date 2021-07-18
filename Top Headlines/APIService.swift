@@ -9,8 +9,14 @@ import Foundation
 
 class APIService {
     static let shared = APIService()
-    enum APIError: Error {
+    enum APIError: Error, LocalizedError {
         case error(_ errorString: String)
+        var errorDescription: String? {
+            switch self {
+            case .error(let description):
+                return description
+            }
+        }
     }
     
     func getJSON<T: Decodable>(urlString: String,

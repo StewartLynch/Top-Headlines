@@ -9,23 +9,28 @@ import Foundation
 
 class NewsViewModel: ObservableObject {
     @Published var articles: [ArticleViewModel] = []
+    @Published var country = Country.country(code: Constants.country)
     @Published var isLoading = false
+    
+    var countryEndpoint: String {
+        Constants.baseURL + "?country=" + country.code + "&apiKey=" + Constants.apiKey
+    }
     func getNews() {
         isLoading = true
         if #available(iOS 15, *) {
             Task.init {
                 do {
-                let news:News = try await APIService.shared.getJSON(urlString: Constants.endPoint, dateDecodingStrategy: .iso8601)
-                    print(Thread.current)
+                let news:News = try await APIService.shared.getJSON(urlString: countryEndpoint, dateDecodingStrategy: .iso8601)
                     articles = news.articles.map(ArticleViewModel.init)
                     isLoading = false
                 } catch {
                     print(error.localizedDescription)
+                    isLoading = false
                 }
             }
 
         } else {
-            APIService.shared.getJSON(urlString: Constants.endPoint, dateDecodingStrategy: .iso8601) { (result: Result<News, APIService.APIError>) in
+            APIService.shared.getJSON(urlString: countryEndpoint, dateDecodingStrategy: .iso8601) { (result: Result<News, APIService.APIError>) in
                 switch result {
                 case .success(let news):
                     DispatchQueue.main.async {
@@ -34,6 +39,7 @@ class NewsViewModel: ObservableObject {
                     }
                 case .failure(let error):
                     print(error.localizedDescription)
+                    self.isLoading = false
                 }
             }
         }
